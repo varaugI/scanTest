@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Classify</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <script src="./js/tf.min.js"></script>
+    <script src="./js/teachablemachine-image.min.js"></script>
+    <script src="./js/bootstrap.bundle.min.js"></script>
+    <script src="./js/jquery.min.js"></script>
+</head>
+
+<body>
+    <h1 style="background-color: rgb(180, 255, 94);text-align: center;">CLASSIFY</h1>
+    <div style="width: 415px;height: 425px;" id="webcam-container">
+        <img id="img" src="camera.png" style="width: 415px;height: 425px;">
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col"></div>
+            <div class="col">
+                <button class="btn btn-success" id="startS" onclick="init()"
+                    style="float: right;color: whitesmoke;">Start Scanning</button>
+                <button class="btn btn-danger" id="stopS" onclick="stopWC()" hidden
+                    style="float: right;color: whitesmoke;">Stop Scanning</button>
+            </div>
+        </div>
+    </div>
+    <div id="class">
+        <div class="container">
+            <h2 style="background-color: rgb(35, 151, 228);text-align: center;">24 Posssibilities from calender</h2>
+            <div class="row">
+                <div class="col">
+                    <ul>
+                        <li>Jaisalmer</li>
+                        <li>Victoria Memorial</li>
+                        <li>Calangute Beach</li>
+                    </ul>
+                </div>
+                <div class="col">
+                    <ul>
+                        <li>Sanchi gupta</li>
+                        <li>Shree krishna Arjun chariot</li>
+                        <li>Swaraj Dweeop(Havelock)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <ul>
+                        <li>Mahabodhi Temple</li>
+                        <li>Solophok Chardham Namchi</li>
+                        <li>State of Unity</li>
+                    </ul>
+                </div>
+                <div class="col">
+                    <ul>
+                        <li>Sri Venkateshvara Swami Temple</li>
+                        <li>Rath Yatra-Puri</li>
+                        <li>Taj Mahal</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <ul>
+                        <li>Hundru Falls</li>
+                        <li>Rameshwaram</li>
+                        <li>Stone Chariot</li>
+                    </ul>
+                </div>
+                <div class="col">
+                    <ul>
+                        <li>Kedarnath Temple</li>
+                        <li>Kamakhya Temple</li>
+                        <li>Charminar</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <ul>
+                        <li>Golden Temple</li>
+                        <li>Chandra Taal</li>
+                        <li>Kathakali</li>
+                    </ul>
+                </div>
+                <div class="col">
+                    <ul>
+                        <li>Ganesh Chaturthi</li>
+                        <li>India Gate</li>
+                        <li>Dal Lake</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div>
+        <h2 id="description" hidden style="text-align: center;color:rgb(31, 31, 128);text-decoration: underline;"></h2>
+    </div>
+    <div id="label-container"
+        style="font-size: x-large;font-family: 'Times New Roman', Times, serif;font-style: oblique;"></div>
+    <script type="text/javascript">
+        const URL = "./";
+        window.speechSynthesis.cancel();
+        let model, webcam, label, labelContainer, name, maxPredictions;
+        let speech = new SpeechSynthesisUtterance();
+        speech.lang = "en-GB";
+        speech.volume = 1;
+        speech.rate = 1;
+        speech.pitch = 1;
+        speech.text = "";
+
+        async function init() {
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+            const flip = false;
+            webcam = new tmImage.Webcam(415, 425, flip);
+            const facingMode = { exact: "environment" };
+            await webcam.setup({ facingMode });
+            await webcam.play();
+            window.requestAnimationFrame(loop);
+            document.getElementById("webcam-container").appendChild(webcam.canvas);
+            labelContainer = document.getElementById("label-container");
+            labelContainer.innerHTML = "";
+            document.getElementById('img').hidden = true;
+            document.getElementById('class').hidden = true;
+        }
+
+        const predictionsData = require('./label.json');
+
+        async function loop() {
+            webcam.update();
+            const prediction = await model.predict(webcam.canvas);
+            let detected = false;
+            for (let i = 0; i < maxPredictions; i++) {
+                if (prediction[i].probability.toFixed(2) * 100 > 95) {
+                    const className = prediction[i].className;
+                    if (predictionsData.hasOwnProperty(className)) {
+                        const name = className;
+                        const label = predictionsData[className];
+                        
+                    }
+                    hide();
+                    detected = true;
+                    break;
+                }
+            }
+            if (detected) {
+                speech.text = label;
+                if (!window.speechSynthesis.speaking) {
+                    window.speechSynthesis.speak(speech);
+                    document.getElementById('description').innerHTML = name.toUpperCase();
+                    document.getElementById('description').hidden = false;
+                    labelContainer.innerHTML = label;
+                }
+            } else {
+                window.speechSynthesis.cancel();
+                document.getElementById('description').hidden = true;
+                labelContainer.innerHTML = "";
+                document.getElementById('class').hidden = false;
+            }
+            window.requestAnimationFrame(loop);
+        }
+
+        function hide() {
+            document.getElementById('startS').hidden = true;
+            document.getElementById('stopS').hidden = false;
+            document.getElementById('class').hidden = true;
+            document.getElementById('img').hidden = true;
+        }
+
+        function stopWC() {
+            window.speechSynthesis.cancel();
+            document.getElementById('startS').hidden = false;
+            document.getElementById('stopS').hidden = true;
+            document.getElementById('description').hidden = true;
+            labelContainer.innerHTML = "";
+            document.getElementById('class').hidden = false;
+            webcam.stop();
+            document.getElementById("webcam-container").removeChild(webcam.canvas);
+            document.getElementById('img').hidden = false;
+        }       
+    </script>
+</body>
+
+</html>
