@@ -149,7 +149,7 @@
                     // console.log(data);
                     for (let i = 0; i < maxPredictions; i++) {
                         if (prediction[i].probability.toFixed(2) * 100 > 95) {
-                            if (prediction[i].className === data[prediction[i].className[0].name]) {
+                            if (prediction[i].className === data[prediction[i].className[0]].name) {
                                 name = data[prediction[i].className][0].name;
                                 label = data[prediction[i].className][0].label;
                                 speech.text = label;
