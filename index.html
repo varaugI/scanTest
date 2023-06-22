@@ -151,8 +151,8 @@
                         if (prediction[i].probability.toFixed(2) * 100 > 95) {
                             var className = prediction[i].className;
                             if (prediction[i].className === data[className]) {
-                                name = data[i].name;
-                                label = data[i].label;
+                                name = data[className].name;
+                                label = data[className].label;
                                 speech.text = label;
                                 if (!window.speechSynthesis.speaking) {
                                     window.speechSynthesis.speak(speech);
