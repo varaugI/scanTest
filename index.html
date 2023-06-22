@@ -158,14 +158,15 @@
                                     document.getElementById('description').hidden = false;
                                     labelContainer.innerHTML = label;
                                 }
-                            } else {
-                                window.speechSynthesis.cancel();
-                                document.getElementById('description').hidden = true;
-                                labelContainer.innerHTML = "";
-                                document.getElementById('class').hidden = false;
+                                else {
+                                    window.speechSynthesis.cancel();
+                                    document.getElementById('description').hidden = true;
+                                    labelContainer.innerHTML = "";
+                                    document.getElementById('class').hidden = false;
+                                }
                             }
                         }
-                        hide(); 
+                        hide();
                     }
                     window.requestAnimationFrame(loop);
                 }
