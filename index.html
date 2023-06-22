@@ -146,11 +146,11 @@
             fetch('./label.json')
                 .then((response) => response.json())
                 .then(data => {
-                    console.log(data);
+                    // console.log(data);
                     for (let i = 0; i < maxPredictions; i++) {
                         if (prediction[i].probability.toFixed(2) * 100 > 95) {
                             var className = prediction[i].className;
-                            if (prediction[i].className === data[className]) {
+                            if (className === data[className]) {
                                 name = data[className][0].name;
                                 label = data[className][0].label;
                                 speech.text = label;
