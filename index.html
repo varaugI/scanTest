@@ -138,40 +138,46 @@
             document.getElementById('class').hidden = true;
         }
 
-        const predictionsData = require('./label.json');
 
         async function loop() {
             webcam.update();
             const prediction = await model.predict(webcam.canvas);
             let detected = false;
-            for (let i = 0; i < maxPredictions; i++) {
-                if (prediction[i].probability.toFixed(2) * 100 > 95) {
-                    const className = prediction[i].className;
-                    if (predictionsData.hasOwnProperty(className)) {
-                        const name = className;
-                        const label = predictionsData[className];
-                        
+            fetch('./label.json')
+                .then((response) => response.json())
+                .then(data => {
+                    console.log(data);
+
+                    for (let i = 0; i < maxPredictions; i++) {
+                        if (prediction[i].probability.toFixed(2) * 100 > 95) {
+                            const className = prediction[i].className;
+                            if (prediction[i].className === data[i]) {
+                                const name = data[i].name;
+                                const label = data[i].label;
+
+                            }
+                            hide();
+                            detected = true;
+                            break;
+                        }
                     }
-                    hide();
-                    detected = true;
-                    break;
+                    if (detected) {
+                        speech.text = label;
+                        if (!window.speechSynthesis.speaking) {
+                            window.speechSynthesis.speak(speech);
+                            document.getElementById('description').innerHTML = name.toUpperCase();
+                            document.getElementById('description').hidden = false;
+                            labelContainer.innerHTML = label;
+                        }
+                    } else {
+                        window.speechSynthesis.cancel();
+                        document.getElementById('description').hidden = true;
+                        labelContainer.innerHTML = "";
+                        document.getElementById('class').hidden = false;
+                    }
+                    window.requestAnimationFrame(loop);
                 }
-            }
-            if (detected) {
-                speech.text = label;
-                if (!window.speechSynthesis.speaking) {
-                    window.speechSynthesis.speak(speech);
-                    document.getElementById('description').innerHTML = name.toUpperCase();
-                    document.getElementById('description').hidden = false;
-                    labelContainer.innerHTML = label;
-                }
-            } else {
-                window.speechSynthesis.cancel();
-                document.getElementById('description').hidden = true;
-                labelContainer.innerHTML = "";
-                document.getElementById('class').hidden = false;
-            }
-            window.requestAnimationFrame(loop);
+            )
         }
 
         function hide() {
