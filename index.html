@@ -147,7 +147,6 @@
                 .then((response) => response.json())
                 .then(data => {
                     console.log(data);
-
                     for (let i = 0; i < maxPredictions; i++) {
                         if (prediction[i].probability.toFixed(2) * 100 > 95) {
                             const className = prediction[i].className;
@@ -168,8 +167,7 @@
                                 document.getElementById('class').hidden = false;
                             }
                         }
-                        hide();
-                        
+                        hide(); 
                     }
                     window.requestAnimationFrame(loop);
                 }
